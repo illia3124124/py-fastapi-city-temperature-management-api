@@ -10,8 +10,7 @@ from city.crud import db_read_cities
 from city.models import City, Temperature
 from temperature.crud import (
     db_read_temperatures,
-    db_create_temperature,
-    db_read_temperature
+    db_create_temperature
 )
 settings = get_settings()
 
@@ -51,10 +50,14 @@ async def safe_fetch(url):
         return await fetch(url)
 
 
-def service_read_temperatures(
+def service_read_temperature(
+    city_id: int,
     db: Session
-) -> list[Temperature | None]:
-    return db_read_temperatures(db=db)
+) -> list[Temperature]:
+    return db_read_temperatures(
+        city_id=city_id,
+        db=db
+    )
 
 
 async def fetch_temperature_for_city(city_name: str) -> dict:
@@ -103,19 +106,3 @@ async def service_update_temperatures(
         )
 
     return {"message": "Temperatures updated successfully"}
-
-
-def service_read_temperature(
-    city_id: int,
-    db: Session
-) -> Temperature:
-    temperature = db_read_temperature(
-        city_id=city_id,
-        db=db
-    )
-    if temperature is None:
-        raise HTTPException(
-            status_code=404,
-            detail="Temperature not found for the specified city"
-        )
-    return temperature

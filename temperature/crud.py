@@ -5,9 +5,12 @@ from city.models import Temperature
 
 
 def db_read_temperatures(
-    db: Session
-) -> list[Temperature | None]:
-    return db.execute(select(Temperature)).scalars().all()
+    db: Session,
+    city_id: int | None = None
+) -> list[Temperature]:
+    if city_id is None:
+        return db.execute(select(Temperature)).scalars().all()
+    return db.execute(select(Temperature).where(Temperature.city_id == city_id)).scalars().all()
 
 
 def db_create_temperature(
@@ -25,8 +28,3 @@ def db_create_temperature(
     return new_temperature
 
 
-def db_read_temperature(
-    city_id: int,
-    db: Session
-) -> Temperature | None:
-    return db.execute(select(Temperature).where(Temperature.city_id == city_id)).scalar_one_or_none()

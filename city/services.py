@@ -14,7 +14,7 @@ from city.crud import (
 
 def service_read_cities(
     db: Session
-) -> list[City | None]:
+) -> list[City]:
     return db_read_cities(db=db)
 
 
