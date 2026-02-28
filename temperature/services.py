@@ -3,13 +3,16 @@ import httpx
 
 from sqlalchemy.orm import Session
 from datetime import datetime
+from fastapi import HTTPException
 
 from settings import get_settings
 from city.crud import db_read_cities
 from city.models import City, Temperature
-from temperature.schemas import TemperatureDto
-from temperature.crud import db_read_temperatures, db_create_temperature
-
+from temperature.crud import (
+    db_read_temperatures,
+    db_create_temperature,
+    db_read_temperature
+)
 settings = get_settings()
 
 
@@ -50,7 +53,7 @@ async def safe_fetch(url):
 
 def service_read_temperatures(
     db: Session
-) -> list[TemperatureDto | None]:
+) -> list[Temperature | None]:
     return db_read_temperatures(db=db)
 
 
@@ -70,21 +73,14 @@ def _save_temperature_for_city(
         temperature = temperature_data["main"]["temp"]
     except (KeyError, TypeError, ValueError):
         return
-    if city.temperature:
-        city.temperature.date_time = date
-        city.temperature.temperature = temperature
-    else:
-        new_temperature = db_create_temperature(
-            temprature=Temperature(
-                city_id=city.id,
-                date_time=date,
-                temperature=temperature
-            ),
-            db=db
-        )
-        city.temperature = new_temperature
-    db.commit()
-    db.refresh(city.temperature)
+    return db_create_temperature(
+        temprature=Temperature(
+            city_id=city.id,
+            date_time=date,
+            temperature=temperature
+        ),
+        db=db
+    )
 
 
 async def service_update_temperatures(
@@ -92,12 +88,12 @@ async def service_update_temperatures(
 ) -> dict:
     cities = db_read_cities(db=db)
     
-    cities_tempreture = await asyncio.gather(
+    cities_temperature = await asyncio.gather(
         *[fetch_temperature_for_city(city.name) for city in cities],
         return_exceptions=True
     )
     
-    for city, temperature_data in zip(cities, cities_tempreture):
+    for city, temperature_data in zip(cities, cities_temperature):
         if isinstance(temperature_data, Exception):
             continue
         _save_temperature_for_city(
@@ -107,3 +103,19 @@ async def service_update_temperatures(
         )
 
     return {"message": "Temperatures updated successfully"}
+
+
+def service_read_temperature(
+    city_id: int,
+    db: Session
+) -> Temperature:
+    temperature = db_read_temperature(
+        city_id=city_id,
+        db=db
+    )
+    if temperature is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Temperature not found for the specified city"
+        )
+    return temperature

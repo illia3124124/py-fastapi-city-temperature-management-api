@@ -34,8 +34,7 @@ def upgrade() -> None:
     sa.Column('temperature', sa.Float(), nullable=False),
     sa.Column('city_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['city_id'], ['cities.id'], ),
-    sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('city_id')
+    sa.PrimaryKeyConstraint('id')
     )
     # ### end Alembic commands ###
 

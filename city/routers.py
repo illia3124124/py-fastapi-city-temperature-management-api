@@ -18,7 +18,7 @@ city_router = APIRouter(
 )
 
 
-@city_router.get("/", response_model=list[CityDto])
+@city_router.get("/", response_model=list[CityDto | None])
 def get_cities(
     db: Session = Depends(get_db)
 ):

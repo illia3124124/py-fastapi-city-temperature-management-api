@@ -3,7 +3,6 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from city.models import City
-from city.schemas import CityDto
 
 
 def db_read_cities(
@@ -29,7 +28,7 @@ def db_create_city(
 def db_read_city(
     id: int,
     db: Session
-) -> CityDto | None:
+) -> City | None:
     return db.execute(select(City).where(City.id == id)).scalar_one_or_none()
 
 

@@ -23,3 +23,10 @@ def db_create_temperature(
     db.commit()
     db.refresh(new_temperature)
     return new_temperature
+
+
+def db_read_temperature(
+    city_id: int,
+    db: Session
+) -> Temperature | None:
+    return db.execute(select(Temperature).where(Temperature.city_id == city_id)).scalar_one_or_none()

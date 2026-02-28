@@ -13,11 +13,10 @@ class City(Base):
     name: Mapped[str] = mapped_column(String(100), unique=True, nullable=False)
     additional_info: Mapped[Optional[str]] = mapped_column(String(350), nullable=True)
 
-    temperature: Mapped["Temperature | None"] = relationship(
+    temperatures: Mapped[list["Temperature"]] = relationship(
         "Temperature",
         back_populates="city",
-        cascade="all, delete-orphan",
-        uselist=False,
+        cascade="all, delete-orphan"
     )
     
     @validates("name")
@@ -34,5 +33,5 @@ class Temperature(Base):
     date_time: Mapped[datetime] = mapped_column(DateTime(), nullable=False)
     temperature: Mapped[float] = mapped_column(Float, nullable=False)
 
-    city_id: Mapped[int] = mapped_column(ForeignKey("cities.id"), nullable=False, unique=True)
-    city: Mapped["City"] = relationship("City", back_populates="temperature")
+    city_id: Mapped[int] = mapped_column(ForeignKey("cities.id"), nullable=False)
+    city: Mapped["City"] = relationship("City", back_populates="temperatures")

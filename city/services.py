@@ -2,7 +2,7 @@ from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
 from city.models import City
-from city.schemas import CityDto, CityCreateUpdateDto
+from city.schemas import CityCreateUpdateDto
 from city.crud import (
     db_read_cities,
     db_create_city,
@@ -14,14 +14,14 @@ from city.crud import (
 
 def service_read_cities(
     db: Session
-) -> list[CityDto | None]:
+) -> list[City | None]:
     return db_read_cities(db=db)
 
 
 def service_create_city(
     city: CityCreateUpdateDto,
     db: Session
-) -> CityDto:
+) -> City:
     try:
         created_city = db_create_city(
             City(
@@ -46,7 +46,7 @@ def service_create_city(
 def service_read_city(
     id: int,
     db: Session
-) -> CityDto:
+) -> City:
     city = db_read_city(
         id=id,
         db=db
@@ -63,7 +63,7 @@ def service_update_city(
     id: int,
     city: CityCreateUpdateDto,
     db: Session
-) -> CityDto:
+) -> City:
     try:
         updated_city = db_update_city(
             id=id,
